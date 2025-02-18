@@ -47,4 +47,4 @@ def validate_request_data(schema, data):
     try:
         return schema.load(data), None
     except ValidationError as err:
-        return {"error": err.messages[0]}, 400
+        return {"error": err.messages}, 400

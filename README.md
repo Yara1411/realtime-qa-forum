@@ -36,16 +36,12 @@ When an answer is added, a **WebSocket event** (`new_answer`) is emitted, updati
 ---
 
 ## Installation & Setup
-### **1. Clone the Repository**
+### **Clone the Repository**
 Ensure you have Git installed, then run:
 ```sh
  git clone <http-github-repo-url>
  cd realtime-qa-forum
 ```
-
-### **2. Install Dependencies**
-Ensure you are using **Python 3.9**.
-
 ---
 
 ## Running the Application with Docker

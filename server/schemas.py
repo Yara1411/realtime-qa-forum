@@ -16,25 +16,21 @@ def validate_unique_title(value):
 class QuestionSchema(Schema):
     title = fields.String(
         required=True,
-        validate=validate.Length(min=5, max=100),
+        validate=validate.Length(min=2, max=300),
         error_messages={"required": "Title is required."}
     )
     content = fields.String(
         required=True,
-        validate=validate.Length(min=10, max=500),
+        validate=validate.Length(min=2, max=300),
         error_messages={"required": "Content is required."}
     )
 
 class AnswerSchema(Schema):
     content = fields.String(
         required=True,
-        validate=validate.Length(min=5, max=300),
+        validate=validate.Length(min=2, max=300),
         error_messages={"required": "Answer content is required."}
     )
-
-class QuestionUpdateSchema(Schema):
-    title = fields.String(validate=validate.Length(min=5, max=100))
-    content = fields.String(validate=validate.Length(min=5, max=500))
 
 class AnswerUpdateSchema(Schema):
     content = fields.String(

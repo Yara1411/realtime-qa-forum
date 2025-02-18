@@ -1,0 +1,17 @@
+FROM ghcr.io/cirruslabs/flutter:latest
+
+WORKDIR /app
+
+RUN flutter config --enable-web
+
+COPY client/pubspec.* ./
+
+RUN flutter pub get
+
+COPY client ./
+
+RUN flutter build web --release
+
+EXPOSE 8080
+
+CMD ["flutter", "run", "-d", "web-server", "--web-port", "8080", "--web-hostname", "0.0.0.0"]

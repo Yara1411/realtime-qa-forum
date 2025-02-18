@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from extensions import socketio
 from flask_socketio import join_room
 from flask_cors import CORS
+from schemas import QuestionSchema, validate_request_data, AnswerSchema, QuestionUpdateSchema, AnswerUpdateSchema
 import os
 
 app = Flask(__name__)
@@ -38,9 +39,16 @@ def on_new_answer(question_id, answer):
 @app.route("/questions", methods=["POST"])
 def create_question():
     data = request.json
+    validated_data, error = validate_request_data(QuestionSchema(), data)
 
-    if "title" not in data or "content" not in data:
-        return jsonify({"error": "Title and content are required"}), 400
+    if error:
+        return error, 400
+
+    existing_question = mongo.db.questions.find_one({"title": validated_data["title"]})
+
+    if existing_question:
+        return jsonify({"error": "A question with this title already exists. Please choose a different title."}), 400
+
     question = {
         "title": data["title"],
         "content": data["content"],
@@ -74,6 +82,11 @@ def get_question(question_id):
 @app.route("/questions/<question_id>/answers", methods=["POST"])
 def add_answers(question_id):
     data = request.json
+    validated_data, error = validate_request_data(AnswerSchema(), data)
+
+    if error:
+        return error, 400
+
     if "content" not in data:
         return jsonify({"error": "Answer content is required"}), 400
 
@@ -92,6 +105,13 @@ def add_answers(question_id):
 @app.route("/questions/<question_id>", methods=["PUT"])
 def update_question(question_id):
     data = request.json
+    validated_data, error = validate_request_data(QuestionUpdateSchema(), data)
+    if error:
+        return error, 400
+
+    if not validated_data:
+        return jsonify({"error": "No valid fields to update"}), 400
+
     update_fields = {}
 
     if "title" in data:
@@ -113,6 +133,10 @@ def update_question(question_id):
 @app.route("/questions/<question_id>/answers/<int:answer_index>", methods=["PUT"])
 def update_answer(question_id, answer_index):
     data = request.json
+    validated_data, error = validate_request_data(AnswerUpdateSchema(), data)
+
+    if error:
+        return error, 400
 
     if "content" not in data:
         return jsonify({"error": "Updated content is required"}), 400

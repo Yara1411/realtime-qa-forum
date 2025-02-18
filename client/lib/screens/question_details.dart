@@ -130,6 +130,7 @@ class _QuestionDetailsScreenState extends State<QuestionDetailsScreen> {
                 throw Exception('Failed to submit answer');
             }
         } catch (e) {
+            print(e);
             ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error submitting answer")),
         );

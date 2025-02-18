@@ -1,5 +1,4 @@
 from marshmallow import Schema, fields, validate, ValidationError
-from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 
 def validate_objectid(value):
@@ -9,7 +8,7 @@ def validate_objectid(value):
         raise ValidationError("Invalid question ID format.")
 
 def validate_unique_title(value):
-    from app import mongo
+    from api import mongo
     existing_question = mongo.db.questions.find_one({"title": value})
     if existing_question:
         raise ValidationError("A question with this title already exists. Please choose a different title.")
@@ -35,12 +34,12 @@ class AnswerSchema(Schema):
 
 class QuestionUpdateSchema(Schema):
     title = fields.String(validate=validate.Length(min=5, max=100))
-    content = fields.String(validate=validate.Length(min=10, max=500))
+    content = fields.String(validate=validate.Length(min=5, max=500))
 
 class AnswerUpdateSchema(Schema):
     content = fields.String(
         required=True,
-        validate=validate.Length(min=5, max=300),
+        validate=validate.Length(min=2, max=300),
         error_messages={"required": "Updated content is required."}
     )
 
@@ -48,4 +47,4 @@ def validate_request_data(schema, data):
     try:
         return schema.load(data), None
     except ValidationError as err:
-        return None, {"error": err.messages}, 400
+        return {"error": err.messages}, 400

@@ -41,11 +41,13 @@ class _CreateQuestionScreenState extends State<CreateQuestionScreen> {
             );
             Navigator.pop(context);
         } else {
-            throw Exception('Failed to create question');
+            final responseBody = jsonDecode(response.body);
+            final errorMessage = responseBody['error'] ?? 'Failed to create question';
+            throw Exception(errorMessage);
             }
         } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error creating question")),
+            SnackBar(content: Text(e.toString())),
         );
         } finally {
             setState(() {

@@ -47,22 +47,30 @@ class _UpdateQuestionScreenState extends State<UpdateQuestionScreen> {
                 "content": _contentController.text,
             }),
             );
-
             if (response.statusCode == 200) {
                 ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text("Question updated successfully!")),
             );
             Navigator.pop(context, true);
             } else {
-                throw Exception('Failed to update question');
+                final responseBody = jsonDecode(response.body);
+                String errorMessage;
+                if (responseBody['error'] is String) {
+                    errorMessage = responseBody['error'];
+                } else if (responseBody['error'] is Map) {
+                    errorMessage = responseBody['error'].values.first[0];
+                } else {
+                    errorMessage = 'Error updating a question';
+                }
+                throw Exception(errorMessage);
             }
-    } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error updating question")),
+        } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(e.toString())),
         );
-    } finally {
-        setState(() {
-            isUpdating = false;
+        } finally {
+            setState(() {
+                isUpdating = false;
             });
         }
     }

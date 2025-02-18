@@ -34,7 +34,6 @@ class _QuestionDetailsScreenState extends State<QuestionDetailsScreen> {
             if (questionId.isEmpty) {
                 print("ERROR: Question ID is null or empty");
             } else {
-                print("Question ID: $questionId");
                 fetchAnswers(questionId);
                 connectToSocketIO(questionId);
             }
@@ -127,12 +126,13 @@ class _QuestionDetailsScreenState extends State<QuestionDetailsScreen> {
             if (response.statusCode == 201) {
                 _answerController.clear();
             } else {
-                throw Exception('Failed to submit answer');
+                final responseBody = jsonDecode(response.body);
+                final errorMessage = responseBody['error'] ?? 'Failed to create question';
+                throw Exception(errorMessage);
             }
         } catch (e) {
-            print(e);
             ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error submitting answer")),
+            SnackBar(content: Text(e.toString())),
         );
         } finally {
         setState(() {

@@ -4,8 +4,7 @@ from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from extensions import socketio
 from flask_cors import CORS
-from schemas import ValidationError, QuestionSchema, validate_request_data, AnswerSchema, QuestionUpdateSchema, AnswerUpdateSchema, validate_unique_title
-
+from schemas import ValidationError, QuestionSchema, validate_request_data, AnswerSchema, AnswerUpdateSchema, validate_unique_title
 import os
 
 
@@ -17,13 +16,13 @@ CORS(api_app)
 @api_app.route("/questions", methods=["POST"])
 def create_question():
     data = request.json
-    data, error_code = validate_request_data(QuestionSchema(), data)
+    input_error, error_code = validate_request_data(QuestionSchema(), data)
 
     if error_code:
-        return data, error_code
+        return input_error, error_code
 
     try:
-        validate_unique_title(data["title"])
+        validate_unique_title(input_error["title"])
     except ValidationError as err:
         return jsonify({"error": err.messages[0]}), 400
 
@@ -60,9 +59,9 @@ def get_question(question_id):
 @api_app.route("/questions/<question_id>/answers", methods=["POST"])
 def add_answers(question_id):
     data = request.json
-    data, error = validate_request_data(AnswerSchema(), data)
+    input_error, error = validate_request_data(AnswerSchema(), data)
     if error:
-        return data, error
+        return input_error, error
 
     answer = {"content": data["content"]}
 
@@ -79,15 +78,15 @@ def add_answers(question_id):
 @api_app.route("/questions/<question_id>", methods=["PUT"])
 def update_question(question_id):
     data = request.json
-    data, error_code = validate_request_data(QuestionUpdateSchema(), data)
+    input_error, error_code = validate_request_data(QuestionSchema(), data)
     if error_code:
-        return data, error_code
+        return input_error, error_code
 
     if not data:
         return jsonify({"error": "No valid fields to update"}), 400
 
     try:
-        validate_unique_title(data["title"])
+        validate_unique_title(input_error["title"])
     except ValidationError as err:
         return jsonify({"error": err.messages[0]}), 400
 
@@ -104,10 +103,15 @@ def update_question(question_id):
 @api_app.route("/questions/<question_id>/answers/<int:answer_index>", methods=["PUT"])
 def update_answer(question_id, answer_index):
     data = request.json
-    data, error = validate_request_data(AnswerUpdateSchema(), data)
+    input_error, error = validate_request_data(AnswerUpdateSchema(), data)
 
     if error:
-        return data, error
+        return input_error, error
+
+    try:
+        validate_unique_title(input_error["title"])
+    except ValidationError as err:
+        return jsonify({"error": err.messages[0]}), 400
 
     question = mongo.db.questions.find_one({"_id": ObjectId(question_id)})
 
